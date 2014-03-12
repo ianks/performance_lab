@@ -2,3 +2,4 @@
 *.o
 Filter
 Judge
+callgrind.out.*
