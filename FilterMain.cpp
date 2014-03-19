@@ -88,7 +88,7 @@ readFilter(string filename)
 }
 
 
-double
+  double
 applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 {
 
@@ -96,48 +96,55 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   cycStart = rdtscll();
 
-  output->width    = input -> width;
-  output->height   = input -> height;
-  int input_height = input->height - 1;
-  int input_width  = input->width - 1;
-  int filter_size  = filter->getSize();
+  // these values were previously used in for loops
+  // meaning that each function/variable was called n times
+  int input_height   = input->height;
+  int input_width    = input->width;
+  int filter_size    = filter->getSize();
   int filter_divisor = filter->getDivisor();
+  output->width    = input_width;
+  output->height   = input_height;
 
   // move by rows first to optimize use of DRAM cache
-  for(int row = 1; row < input_height; row++) {
-    for(int col = 1; col < input_width; col++) {
+  for(int row = 1; row <= input_height; row++) {
+    for(int col = 1; col <= input_width; col++) {
       for(int plane = 0; plane < 3; plane++) {
-        
-	      int t = 0;
-	      output -> color[plane][row][col] = 0;
-        int output_color_index = 0;
 
-	      for (int j = 0; j < filter_size; j++) {
-	        for (int i = 0; i < filter_size; i++) {	
-	          output -> color[plane][row][col]
-	            = (input -> color[plane][row + i - 1][col + j - 1] 
-		          * filter -> get(i, j) );
-	  }
-	}
-	
-	output -> color[plane][row][col] = 	
-	  output -> color[plane][row][col] / filter_divisor;
+        // using acc increased score from 55 to 56 
+        int acc = 0;
 
-	if ( output -> color[plane][row][col]  < 0 ) {
-	  output -> color[plane][row][col] = 0;
-	}
+        // go row then column here too
+        for (int i = 0; i < filter_size; i++) {
+          for (int j = 0; j < filter_size; j++) {	
+            acc
+              = acc
+              + (input->color[plane][row + i - 1][col + j - 1] 
+                  * filter->get(i, j) );
+          }
+        }
+  
+        acc = acc / filter->getDivisor();
 
-	if ( output -> color[plane][row][col]  > 255 ) { 
-	  output -> color[plane][row][col] = 255;
-	}
+        // let's not make so many memory references
+
+        if ( acc  < 0 ) {
+          acc = 0;
+        }
+
+        if ( acc  > 255 ) { 
+          acc = 255;
+        }
+
+        output->color[plane][row][col] = acc;
       }
     }
   }
 
   cycStop = rdtscll();
   double diff = cycStop - cycStart;
-  double diffPerPixel = diff / (output -> width * output -> height);
+  //variablize the output width and height
+  double diffPerPixel = diff / (input_width * input_height);
   fprintf(stderr, "Took %f cycles to process, or %f cycles per pixel\n",
-	  diff, diff / (output -> width * output -> height));
+	  diff, diff / (input_width * input_height));
   return diffPerPixel;
 }

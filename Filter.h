@@ -11,14 +11,14 @@ class Filter {
 
 public:
   Filter(int _dim);
-  inline int get(int &r, int &c);
-  inline void set(int &r, int &c, int &value);
+  int get(int r, int c);
+  void set(int r, int c, int value);
 
-  inline int getDivisor();
-  inline void setDivisor(int &value);
+  int getDivisor();
+  void setDivisor(int value);
 
-  inline int getSize();
-  inline void info();
+  int getSize();
+  void info();
 };
 
 #endif

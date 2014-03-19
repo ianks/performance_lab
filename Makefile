@@ -2,7 +2,7 @@
 ##
 
 CXX	= g++
-CXXFLAGS= -O3 -static
+CXXFLAGS = -Wall -g -O2 -static
 LIBS = -pg
 
 goals: judge
@@ -10,11 +10,11 @@ goals: judge
 
 filter: FilterMain.cpp Filter.cpp cs1300bmp.cc
 	$(CXX) $(CXXFLAGS) -o filter FilterMain.cpp Filter.cpp cs1300bmp.cc $(LIBS)
-##
-## Parameters for the test run
-##
 
 #gprof:
+
+test: filter
+	-./Judge -p ./filter -i boats.bmp
 	
 
 FILTERS = gauss.filter vline.filter hline.filter emboss.filter
