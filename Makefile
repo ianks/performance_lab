@@ -2,7 +2,7 @@
 ##
 
 CXX	= g++
-CXXFLAGS= -m32 -g -O -static
+CXXFLAGS= -O3 -static
 LIBS = -pg
 
 goals: judge

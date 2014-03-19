@@ -8,27 +8,27 @@ Filter::Filter(int _dim)
   data = new int[dim * dim];
 }
 
-int Filter::get(int r, int c)
+inline int Filter::get(int &r, int &c)
 {
   return data[ r * dim + c ];
 }
 
-void Filter::set(int r, int c, int value)
+inline void Filter::set(int &r, int &c, int &value)
 {
   data[ r * dim + c ] = value;
 }
 
-int Filter::getDivisor()
+inline int Filter::getDivisor()
 {
   return divisor;
 }
 
-void Filter::setDivisor(int value)
+inline void Filter::setDivisor(int &value)
 {
   divisor = value;
 }
 
-int Filter::getSize()
+inline int Filter::getSize()
 {
   return dim;
 }
@@ -36,8 +36,8 @@ int Filter::getSize()
 void Filter::info()
 {
   cout << "Filter is.." << endl;
-  for (int col = 0; col < dim; col++) {
-    for (int row = 0; row < dim; row++) {
+  for (int row = 0; row < dim; row++) {
+    for (int col = 0; col < dim; col++) {
       int v = get(row, col);
       cout << v << " ";
     }
