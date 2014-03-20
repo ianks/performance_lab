@@ -133,12 +133,8 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
               acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
           }
         }
-        
-        if (filter_divisor == 1)
-          acc = acc;
-        
-        else
-          acc = acc / filter_divisor;
+
+        acc = acc / filter_divisor;
 
         if ( acc  < 0 )
           acc = 0;
