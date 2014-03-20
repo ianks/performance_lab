@@ -2,7 +2,7 @@
 ##
 
 CXX	= g++
-CXXFLAGS = -g -O3 -funroll-loops
+CXXFLAGS = -g -O4
 LIBS = -pg
 
 goals: judge
@@ -15,7 +15,7 @@ filter: FilterMain.cpp Filter.cpp cs1300bmp.cc
 
 test: filter
 	-./Judge -p ./filter -i boats.bmp
-	
+
 
 FILTERS = gauss.filter vline.filter hline.filter emboss.filter
 IMAGES = boats.bmp blocks-small.bmp
