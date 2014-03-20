@@ -2,7 +2,7 @@
 ##
 
 CXX	= g++
-CXXFLAGS = -Wall -g -O2 -static
+CXXFLAGS = -g -O3 -funroll-loops
 LIBS = -pg
 
 goals: judge

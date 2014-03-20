@@ -98,44 +98,46 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // these values were previously used in for loops
   // meaning that each function/variable was called n times
-  int input_height   = input->height;
-  int input_width    = input->width;
-  int filter_size    = filter->getSize();
-  int filter_divisor = filter->getDivisor();
-  output->width    = input_width;
-  output->height   = input_height;
+  const int input_height   = input->height;
+  const int input_width    = input->width;
+  const int filter_size    = filter->getSize();
+  const int filter_divisor = filter->getDivisor();
+  output->width  = input_width;
+  output->height = input_height;
 
-  // move by rows first to optimize use of DRAM cache
-  for(int row = 1; row <= input_height; row++) {
-    for(int col = 1; col <= input_width; col++) {
-      for(int plane = 0; plane < 3; plane++) {
+  //create filter array to avoid unneccesary memory references
+  int filter_array[3][3];
+  for (int i = 0; i < 3; i++){
+    for (int j = 0; j < 3; j++){
+      filter_array[i][j] = filter->get(i,j);
+    }
+  }
 
-        // using acc increased score from 55 to 56 
+  // move by rs first to optimize use of DRAM cache
+  for(char p = 0; p < 3; p++) {
+    for(int r = 1; r <= input_height; r++) {
+      for(int c = 1; c <= input_width; c++) {
+
+        // using acc increased score from 55 to 56
         int acc = 0;
 
-        // go row then column here too
+        // go r then column here too
         for (int i = 0; i < filter_size; i++) {
-          for (int j = 0; j < filter_size; j++) {	
-            acc
-              = acc
-              + (input->color[plane][row + i - 1][col + j - 1] 
-                  * filter->get(i, j) );
+          for (int j = 0; j < filter_size; j++) {
+            acc = acc + (input->color[p][r + j -1][c+ j -1]
+                  * filter_array[i][j]);
           }
         }
-  
-        acc = acc / filter->getDivisor();
 
-        // let's not make so many memory references
+        acc = acc / filter_divisor;
 
-        if ( acc  < 0 ) {
+        if ( acc  < 0 )
           acc = 0;
-        }
 
-        if ( acc  > 255 ) { 
+        if ( acc  > 255 )
           acc = 255;
-        }
 
-        output->color[plane][row][col] = acc;
+        output->color[p][r][c] = acc;
       }
     }
   }
