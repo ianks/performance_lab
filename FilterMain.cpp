@@ -107,9 +107,10 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // create filter array to avoid unneccesary memory references
   // increased score from 55 to 71
-  int filter_array[3][3];
-  for (int i = 0; i < 3; i++){
-    for (int j = 0; j < 3; j++){
+
+  int filter_array[filter_size][filter_size];
+  for (int i = 0; i < filter_size; i++){
+    for (int j = 0; j < filter_size; j++){
       filter_array[i][j] = filter->get(i,j);
     }
   }
