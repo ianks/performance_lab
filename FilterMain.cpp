@@ -106,36 +106,33 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   output->height   = input_height;
 
   // move by rows first to optimize use of DRAM cache
-  for(int row = 1; row <= input_height; row++) {
-    for(int col = 1; col <= input_width; col++) {
-      for(int plane = 0; plane < 3; plane++) {
+  for(int plane = 0; plane < 3; plane++) {
+    for(int row = 1; row <= input_height; row++) {
+      for(int col = 1; col <= input_width; col++) {
 
         // using acc increased score from 55 to 56 
-        int acc = 0;
+        int acc1 = int acc2 = int acc3 = int acc4 = 0;
 
         // go row then column here too
         for (int i = 0; i < filter_size; i++) {
           for (int j = 0; j < filter_size; j++) {	
-            acc
-              = acc
-              + (input->color[plane][row + i - 1][col + j - 1] 
-                  * filter->get(i, j) );
+            acc1
+                  = acc1
+                  + (input->color[plane][row + j -1][col+ j -1]
+                  * filter->get(i,j));
           }
         }
   
-        acc = acc / filter->getDivisor();
+        acc1 = acc1 / filter_divisor;
 
-        // let's not make so many memory references
+        if ( acc1  < 0 ) 
+          acc1 = 0;
 
-        if ( acc  < 0 ) {
-          acc = 0;
-        }
+        if ( acc1  > 255 ) 
+          acc1 = 255;
+        
 
-        if ( acc  > 255 ) { 
-          acc = 255;
-        }
-
-        output->color[plane][row][col] = acc;
+        output->color[plane][row][col] = acc1;
       }
     }
   }
