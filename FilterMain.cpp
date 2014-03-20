@@ -105,7 +105,8 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   output->width  = input_width;
   output->height = input_height;
 
-  //create filter array to avoid unneccesary memory references
+  // create filter array to avoid unneccesary memory references
+  // increased score from 55 to 71
   int filter_array[3][3];
   for (int i = 0; i < 3; i++){
     for (int j = 0; j < 3; j++){
@@ -113,19 +114,26 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
     }
   }
 
-  // move by rs first to optimize use of DRAM cache
-  for(char p = 0; p < 3; p++) {
+  // move by rows first to optimize use of DRAM cache
+  for(int p = 0; p < 3; p++) {
     for(int r = 1; r <= input_height; r++) {
       for(int c = 1; c <= input_width; c++) {
 
-        // using acc increased score from 55 to 56
+        // using acc alone increased score from 55 to 56
         int acc = 0;
 
-        // go r then column here too
+        // go rows then columns here too
         for (int i = 0; i < filter_size; i++) {
           for (int j = 0; j < filter_size; j++) {
-            acc = acc + (input->color[p][r + j -1][c+ j -1]
-                  * filter_array[i][j]);
+            // checking if 1 increased score from 71 to 75
+            if (filter_array[i][j] == 1)
+              acc = acc + input->color[p][r + j - 1][c + j - 1];
+
+            else if (filter_array[i][j] == -1)
+              acc = -(acc + input->color[p][r + j - 1][c + j - 1]);
+            
+            else
+              acc = acc + (input->color[p][r + j -1][c+ j -1] * filter_array[i][j]);
           }
         }
 
@@ -147,6 +155,6 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   //variablize the output width and height
   double diffPerPixel = diff / (input_width * input_height);
   fprintf(stderr, "Took %f cycles to process, or %f cycles per pixel\n",
-	  diff, diff / (input_width * input_height));
+	  diff, diffPerPixel);
   return diffPerPixel;
 }
