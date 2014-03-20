@@ -98,41 +98,51 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // these values were previously used in for loops
   // meaning that each function/variable was called n times
-  int input_height   = input->height;
-  int input_width    = input->width;
-  int filter_size    = filter->getSize();
-  int filter_divisor = filter->getDivisor();
+  const int input_height   = input->height;
+  const int input_width    = input->width;
+  const int filter_size    = filter->getSize();
+  const int filter_divisor = filter->getDivisor();
   output->width    = input_width;
   output->height   = input_height;
+
+  //create filter array to avoid unneccesary memory references
+  int filter_array[3][3];
+  // for (char i = 0; i < 3; i++){
+  //   for (char j = 0; j < 3; j++){
+  //     filter_array[i][j] = filter->get(i,j);
+  //   }
+  // }
+
+  memcopy(&filter_array, &filter, 6);
 
   // move by rows first to optimize use of DRAM cache
   for(int plane = 0; plane < 3; plane++) {
     for(int row = 1; row <= input_height; row++) {
       for(int col = 1; col <= input_width; col++) {
 
-        // using acc increased score from 55 to 56 
-        int acc1 = int acc2 = int acc3 = int acc4 = 0;
+        // using acc increased score from 55 to 56
+        int acc = 0;
 
         // go row then column here too
         for (int i = 0; i < filter_size; i++) {
-          for (int j = 0; j < filter_size; j++) {	
-            acc1
-                  = acc1
+          for (int j = 0; j < filter_size; j++) {
+            acc
+                  = acc
                   + (input->color[plane][row + j -1][col+ j -1]
-                  * filter->get(i,j));
+                  * filter_array[i][j]);
           }
         }
-  
-        acc1 = acc1 / filter_divisor;
 
-        if ( acc1  < 0 ) 
-          acc1 = 0;
+        acc = acc / filter_divisor;
 
-        if ( acc1  > 255 ) 
-          acc1 = 255;
-        
+        if ( acc  < 0 )
+          acc = 0;
 
-        output->color[plane][row][col] = acc1;
+        if ( acc  > 255 )
+          acc = 255;
+
+
+        output->color[plane][row][col] = acc;
       }
     }
   }
