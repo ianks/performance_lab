@@ -133,10 +133,10 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
             for (int j = 0; j < filter_size; j++) {
               // checking if 1 increased score from 71 to 75
               if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + j - 1][c + j - 1];
+                acc = acc + input->color[p][r + i - 1][c + j - 1];
 
               else
-                acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
+                acc = acc + (input->color[p][r + i -1][c+ j - 1] * filter_array[i][j]);
             }
           }
 
