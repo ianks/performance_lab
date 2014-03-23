@@ -87,210 +87,61 @@ readFilter(string filename)
   }
 }
 
-
-  double
+double
 applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 {
+
 
   long long cycStart, cycStop;
 
   cycStart = rdtscll();
 
-  // these values were previously used in for loops
-  // meaning that each function/variable was called n times
-  const int input_height   = input->height;
-  const int input_width    = input->width;
+  const int input_height   = input->height - 1;
+  const int input_width    = input->width - 1;
   const int filter_size    = filter->getSize();
   const int filter_divisor = filter->getDivisor();
-  output->width  = input_width;
-  output->height = input_height;
 
-  // create filter array to avoid unneccesary memory references
-  // increased score from 55 to 71
+  output -> width = input -> width;
+  output -> height = input -> height;
 
   int filter_array[filter_size][filter_size];
   for (int i = 0; i < filter_size; i++){
-    for (int j = 0; j < filter_size; j= j + 4){
+    for (int j = 0; j < filter_size; j++){
       filter_array[i][j] = filter->get(i,j);
-      filter_array[i][j+1] = filter->get(i,j+1);
-      filter_array[i][j+2] = filter->get(i,j+2);
-      filter_array[i][j+3] = filter->get(i,j+3);
     }
   }
 
-  // move by rows first to optimize use of DRAM cache
 
-  if (filter_divisor == 1){
-    for(int p = 0; p < 3; p++) {
-      for(int r = 1; r <= input_height; r++) {
-        for(int c = 1; c <= input_width; c++) {
+  for(int row = 1; row < input_height; row++) {
+    for(int col = 1; col < input_width; col++) {
+      for(int plane = 0; plane < 3; plane++) {
 
-          // using acc alone increased score from 55 to 56
           int acc = 0;
 
-          // go rows then columns here too
           for (int i = 0; i < filter_size; i++) {
             for (int j = 0; j < filter_size; j++) {
-              // checking if 1 increased score from 71 to 75
-              if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + i - 1][c + j - 1];
-
-              else
-                acc = acc + (input->color[p][r + i -1][c+ j - 1] * filter_array[i][j]);
+              acc = acc + (input -> color[plane][row + i - 1][col + j - 1]
+             * filter_array[i][j]);
             }
           }
 
-          if ( acc  < 0 )
-            acc = 0;
+        acc = acc / filter_divisor;
 
-          if ( acc  > 255 )
-            acc = 255;
+        if ( acc  < 0 )
+          acc = 0;
+        if ( acc  > 255 )
+          acc = 255;
 
-          output->color[p][r][c] = acc;
-        }
-      }
-    }
-  }
-
-  else if (filter_divisor  ==2){
-    for(int p = 0; p < 3; p++) {
-      for(int r = 1; r <= input_height; r++) {
-        for(int c = 1; c <= input_width; c++) {
-
-          // using acc alone increased score from 55 to 56
-          int acc = 0;
-
-          // go rows then columns here too
-          for (int i = 0; i < filter_size; i++) {
-            for (int j = 0; j < filter_size; j++) {
-              // checking if 1 increased score from 71 to 75
-              if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + j - 1][c + j - 1];
-
-              else
-                acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
-            }
-          }
-
-          acc = acc >> 1;
-
-          if ( acc  < 0 )
-            acc = 0;
-
-          if ( acc  > 255 )
-            acc = 255;
-
-          output->color[p][r][c] = acc;
-        }
-      }
-    }
-  }
-
-  else if (filter_divisor  == 4){
-    for(int p = 0; p < 3; p++) {
-      for(int r = 1; r <= input_height; r++) {
-        for(int c = 1; c <= input_width; c++) {
-
-          // using acc alone increased score from 55 to 56
-          int acc = 0;
-
-          // go rows then columns here too
-          for (int i = 0; i < filter_size; i++) {
-            for (int j = 0; j < filter_size; j++) {
-              // checking if 1 increased score from 71 to 75
-              if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + j - 1][c + j - 1];
-
-              else
-                acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
-            }
-          }
-
-          acc = acc >> 2;
-
-          if ( acc  < 0 )
-            acc = 0;
-
-          if ( acc  > 255 )
-            acc = 255;
-
-          output->color[p][r][c] = acc;
-        }
-      }
-    }
-  }
-  else if (filter_divisor  == 8){
-    for(int p = 0; p < 3; p++) {
-      for(int r = 1; r <= input_height; r++) {
-        for(int c = 1; c <= input_width; c++) {
-
-          // using acc alone increased score from 55 to 56
-          int acc = 0;
-
-          // go rows then columns here too
-          for (int i = 0; i < filter_size; i++) {
-            for (int j = 0; j < filter_size; j++) {
-              // checking if 1 increased score from 71 to 75
-              if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + j - 1][c + j - 1];
-
-              else
-                acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
-            }
-          }
-
-          acc = acc >> 3;
-
-          if ( acc  < 0 )
-            acc = 0;
-
-          if ( acc  > 255 )
-            acc = 255;
-
-          output->color[p][r][c] = acc;
-        }
-      }
-    }
-  }
-  else{
-    for(int p = 0; p < 3; p++) {
-      for(int r = 1; r <= input_height; r++) {
-        for(int c = 1; c <= input_width; c++) {
-
-          // using acc alone increased score from 55 to 56
-          int acc = 0;
-
-          // go rows then columns here too
-          for (int i = 0; i < filter_size; i++) {
-            for (int j = 0; j < filter_size; j++) {
-              // checking if 1 increased score from 71 to 75
-              if (filter_array[i][j] == 1)
-                acc = acc + input->color[p][r + j - 1][c + j - 1];
-
-              else
-                acc = acc + (input->color[p][r + j -1][c+ j - 1] * filter_array[i][j]);
-            }
-          }
-
-          acc = acc / filter_divisor;
-
-          if ( acc  < 0 )
-            acc = 0;
-
-          if ( acc  > 255 )
-            acc = 255;
-
-          output->color[p][r][c] = acc;
-        }
+        output -> color[plane][row][col] = acc;
       }
     }
   }
 
   cycStop = rdtscll();
   double diff = cycStop - cycStart;
-  //variablize the output width and height
-  double diffPerPixel = diff / (input_width * input_height);
+  double diffPerPixel = diff / (output -> width * output -> height);
   fprintf(stderr, "Took %f cycles to process, or %f cycles per pixel\n",
-	  diff, diffPerPixel);
+    diff, diff / (output -> width * output -> height));
   return diffPerPixel;
 }
+

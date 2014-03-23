@@ -36,9 +36,10 @@ int Filter::getSize()
 void Filter::info()
 {
   cout << "Filter is.." << endl;
-  for (int row = 0; row < dim; row++) {
-    for (int col = 0; col < dim; col++) {
-      cout << get(row, col) << " ";
+  for (int col = 0; col < dim; col++) {
+    for (int row = 0; row < dim; row++) {
+      int v = get(row, col);
+      cout << v << " ";
     }
     cout << endl;
   }
