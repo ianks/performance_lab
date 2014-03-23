@@ -129,6 +129,7 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
         int acc = 0;
         int acc1=0, acc2=0, acc3=0;
 
+        /*-----------------------------*/
         acc1 += input->color[plane][new_row][col - 1] * filter_array[0][0];
         acc2 += input->color[plane][new_row][col    ] * filter_array[0][1];
         acc3 += input->color[plane][new_row][col + 1] * filter_array[0][2];
@@ -140,8 +141,9 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
         acc1 += input->color[plane][new_row + 2][col - 1] * filter_array[2][0];
         acc2 += input->color[plane][new_row + 2][col    ] * filter_array[2][1];
         acc3 += input->color[plane][new_row + 2][col + 1] * filter_array[2][2];
+        /*-----------------------------*/
 
-        acc = (acc1 + acc2 + acc3s) / filter_divisor;
+        acc = (acc1 + acc2 + acc3) / filter_divisor;
 
         if ( acc  < 0 )
           acc = 0;
