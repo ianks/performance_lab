@@ -98,7 +98,7 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   const int input_height   = input->height - 1;
   const int input_width    = input->width - 1;
-  const int filter_size    = filter->getSize();
+  const int filter_size    = 3;
   const int filter_divisor = filter->getDivisor();
 
   output -> width = input -> width;
@@ -119,11 +119,12 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
           int acc = 0;
 
           for (int i = 0; i < filter_size; i++) {
+            int new_row = row + i - 1;
             for (int j = 0; j < filter_size; j++) {
               if (filter_array[i][j] == 1)
-                acc = acc + input -> color[plane][row + i - 1][col + j - 1];
+                acc = acc + (input -> color[plane][new_row][col + j - 1]);
               else
-                acc = acc + (input -> color[plane][row + i - 1][col + j - 1] * filter_array[i][j]);
+                acc = acc + (input -> color[plane][new_row][col + j - 1] * filter_array[i][j]);
             }
           }
 
