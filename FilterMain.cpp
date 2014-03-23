@@ -122,21 +122,26 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   for(int plane = 0; plane < 3; plane++) {
     for(int row = 1; row < input_height; row++) {
-      int tmp = row - 1;
+      int new_row = row - 1;
       for(int col = 1; col < input_width; col++) {
 
 
-          int acc = 0;
-          int acc1=0, acc2=0, acc3=0;
+        int acc = 0;
+        int acc1=0, acc2=0, acc3=0;
 
-          for (int i = 0; i < filter_size; i++) {
-            int new_row = tmp + i;
-            acc1 += input->color[plane][new_row][col + 0 - 1] * filter_array[i][0];
-            acc2 += input->color[plane][new_row][col + 1 - 1] * filter_array[i][1];
-            acc2 += input->color[plane][new_row][col + 2 - 1] * filter_array[i][2];
-          }
+        acc1 += input->color[plane][new_row][col - 1] * filter_array[0][0];
+        acc2 += input->color[plane][new_row][col    ] * filter_array[0][1];
+        acc3 += input->color[plane][new_row][col + 1] * filter_array[0][2];
 
-        acc = (acc1 + acc2 + acc3) / filter_divisor;
+        acc1 += input->color[plane][new_row + 1][col - 1] * filter_array[1][0];
+        acc2 += input->color[plane][new_row + 1][col    ] * filter_array[1][1];
+        acc3 += input->color[plane][new_row + 1][col + 1] * filter_array[1][2];
+
+        acc1 += input->color[plane][new_row + 2][col - 1] * filter_array[2][0];
+        acc2 += input->color[plane][new_row + 2][col    ] * filter_array[2][1];
+        acc3 += input->color[plane][new_row + 2][col + 1] * filter_array[2][2];
+
+        acc = (acc1 + acc2 + acc3s) / filter_divisor;
 
         if ( acc  < 0 )
           acc = 0;
