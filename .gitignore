@@ -2,3 +2,5 @@
 *.o
 Filter
 callgrind.out.*
+filtered*
+

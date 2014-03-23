@@ -120,8 +120,10 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
           for (int i = 0; i < filter_size; i++) {
             for (int j = 0; j < filter_size; j++) {
-              acc = acc + (input -> color[plane][row + i - 1][col + j - 1]
-             * filter_array[i][j]);
+              if (filter_array[i][j] == 1)
+                acc = acc + input -> color[plane][row + i - 1][col + j - 1];
+              else
+                acc = acc + (input -> color[plane][row + i - 1][col + j - 1] * filter_array[i][j]);
             }
           }
 
