@@ -111,24 +111,32 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
     }
   }
 
+  // int color_copy[3][input_width][input_height];
+  // for (int i = 0; i < 3; ++i){
+  //   for (int j = 1; j < input_width; ++j){
+  //     for (int k = 1; k < input_height; ++k){
+  //       color_copy[i][j][k] = input->color[i][j][k];
+  //     }
+  //   }
+  // }
 
-  for(int row = 1; row < input_height; row++) {
-    for(int col = 1; col < input_width; col++) {
-      for(int plane = 0; plane < 3; plane++) {
+  for(int plane = 0; plane < 3; plane++) {
+    for(int row = 1; row < input_height; row++) {
+      int tmp = row - 1;
+      for(int col = 1; col < input_width; col++) {
+
 
           int acc = 0;
+          int acc1=0, acc2=0, acc3=0;
 
           for (int i = 0; i < filter_size; i++) {
-            int new_row = row + i - 1;
-            for (int j = 0; j < filter_size; j++) {
-              if (filter_array[i][j] == 1)
-                acc = acc + (input -> color[plane][new_row][col + j - 1]);
-              else
-                acc = acc + (input -> color[plane][new_row][col + j - 1] * filter_array[i][j]);
-            }
+            int new_row = tmp + i;
+            acc1 += input->color[plane][new_row][col + 0 - 1] * filter_array[i][0];
+            acc2 += input->color[plane][new_row][col + 1 - 1] * filter_array[i][1];
+            acc2 += input->color[plane][new_row][col + 2 - 1] * filter_array[i][2];
           }
 
-        acc = acc / filter_divisor;
+        acc = (acc1 + acc2 + acc3) / filter_divisor;
 
         if ( acc  < 0 )
           acc = 0;
