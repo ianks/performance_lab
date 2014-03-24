@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "Filter.h"
+#include <omp.h>
 
 using namespace std;
 
@@ -101,8 +102,9 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   const int filter_size    = 3;
   const int filter_divisor = filter->getDivisor();
 
-  output -> width = input -> width;
-  output -> height = input -> height;
+  output -> width = input_width + 1;
+  output -> height = input_height + 1;
+
 
   int filter_array[filter_size][filter_size];
   for (int i = 0; i < filter_size; i++){
@@ -111,49 +113,74 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
     }
   }
 
-  // int color_copy[3][input_width][input_height];
-  // for (int i = 0; i < 3; ++i){
-  //   for (int j = 1; j < input_width; ++j){
-  //     for (int k = 1; k < input_height; ++k){
-  //       color_copy[i][j][k] = input->color[i][j][k];
-  //     }
-  //   }
-  // }
+  if (filter_divisor == 1){
+    for(int p = 0; p < 3; p++) {
+      for(int r = 1; r < input_height; r++) {
+        const int new_row1 = r - 1;
+        const int new_row3 = r + 1;
+        for(int c = 1; c < input_width; c++) {
 
-  for(int plane = 0; plane < 3; plane++) {
-    for(int row = 1; row < input_height; row++) {
-      int new_row = row - 1;
-      for(int col = 1; col < input_width; col++) {
+          int acc1=0, acc2=0, acc3=0;
+          const int col1 = c - 1;
+          const int col3 = c + 1;
 
 
-        int acc = 0;
-        int acc1=0, acc2=0, acc3=0;
+          /*-----------------------------*/
+          acc1 += input->color[p][new_row1][col1] * filter_array[0][0];
+          acc2 += input->color[p][new_row1][c] * filter_array[0][1];
+          acc3 += input->color[p][new_row1][col3] * filter_array[0][2];
 
-        /*-----------------------------*/
-        acc1 += input->color[plane][new_row][col - 1] * filter_array[0][0];
-        acc2 += input->color[plane][new_row][col    ] * filter_array[0][1];
-        acc3 += input->color[plane][new_row][col + 1] * filter_array[0][2];
+          acc1 += input->color[p][r][col1] * filter_array[1][0];
+          acc2 += input->color[p][r][c] * filter_array[1][1];
+          acc3 += input->color[p][r][col3] * filter_array[1][2];
 
-        acc1 += input->color[plane][new_row + 1][col - 1] * filter_array[1][0];
-        acc2 += input->color[plane][new_row + 1][col    ] * filter_array[1][1];
-        acc3 += input->color[plane][new_row + 1][col + 1] * filter_array[1][2];
+          acc1 += input->color[p][new_row3][col1] * filter_array[2][0];
+          acc2 += input->color[p][new_row3][c] * filter_array[2][1];
+          acc3 += input->color[p][new_row3][col3] * filter_array[2][2];
+          /*-----------------------------*/
 
-        acc1 += input->color[plane][new_row + 2][col - 1] * filter_array[2][0];
-        acc2 += input->color[plane][new_row + 2][col    ] * filter_array[2][1];
-        acc3 += input->color[plane][new_row + 2][col + 1] * filter_array[2][2];
-        /*-----------------------------*/
+          int output_color = acc1+acc2+acc3;
 
-        acc = (acc1 + acc2 + acc3) / filter_divisor;
+          output_color           = (output_color < 255) ? output_color : 255;
+          output->color[p][r][c] = (output_color > 0)   ? output_color : 0;
+        }
+      }
+    }
+  }else{
+    for(int p = 0; p < 3; p++) {
+      for(int r = 1; r < input_height; r++) {
+        const int new_row1 = r - 1;
+        const int new_row3 = r + 1;
+        for(int c = 1; c < input_width; c++) {
 
-        if ( acc  < 0 )
-          acc = 0;
-        if ( acc  > 255 )
-          acc = 255;
+          int acc1=0, acc2=0, acc3=0;
+          const int col1 = c - 1;
+          const int col3 = c + 1;
 
-        output -> color[plane][row][col] = acc;
+
+          /*-----------------------------*/
+          acc1 += input->color[p][new_row1][col1] * filter_array[0][0];
+          acc2 += input->color[p][new_row1][c]    * filter_array[0][1];
+          acc3 += input->color[p][new_row1][col3] * filter_array[0][2];
+
+          acc1 += input->color[p][r][col1] * filter_array[1][0];
+          acc2 += input->color[p][r][c]    * filter_array[1][1];
+          acc3 += input->color[p][r][col3] * filter_array[1][2];
+
+          acc1 += input->color[p][new_row3][col1] * filter_array[2][0];
+          acc2 += input->color[p][new_row3][c]    * filter_array[2][1];
+          acc3 += input->color[p][new_row3][col3] * filter_array[2][2];
+          /*-----------------------------*/
+
+          int output_color = (acc1+acc2+acc3) / filter_divisor;
+
+          output_color           = (output_color < 255) ? output_color : 255;
+          output->color[p][r][c] = (output_color > 0)   ? output_color : 0;
+        }
       }
     }
   }
+
 
   cycStop = rdtscll();
   double diff = cycStop - cycStart;
