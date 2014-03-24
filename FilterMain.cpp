@@ -107,17 +107,22 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
 
   int filter_array[filter_size][filter_size];
+  #pragma omp parallel for
   for (int i = 0; i < filter_size; i++){
+    #pragma omp parallel for
     for (int j = 0; j < filter_size; j++){
       filter_array[i][j] = filter->get(i,j);
     }
   }
 
   if (filter_divisor == 1){
+    #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
+      #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
+        #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
@@ -147,16 +152,21 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
       }
     }
   }else{
+    #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
+
+      #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
+
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
+
+        #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
           const int col1 = c - 1;
           const int col3 = c + 1;
-
 
           /*-----------------------------*/
           acc1 += input->color[p][new_row1][col1] * filter_array[0][0];
