@@ -5,20 +5,20 @@
 using namespace std;
 
 class Filter {
-  int divisor;
-  int dim;
-  int *data;
+  short int divisor;
+  short int dim;
+  short int *data;
 
 public:
   Filter(int _dim);
-  int get(int r, int c);
+  short int get(int r, int c) const;
   void set(int r, int c, int value);
 
-  int getDivisor();
+  short int getDivisor() const;
   void setDivisor(int value);
 
-  int getSize();
-  void info();
+  short int getSize() const;
+  void info() const;
 };
 
 #endif

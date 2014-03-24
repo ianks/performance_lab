@@ -2,7 +2,7 @@
 ##
 
 CXX	= g++-4.6
-CXXFLAGS = -m64 -Os -funroll-loops -fopenmp
+CXXFLAGS = -m64 -Os -funroll-loops -fopenmp -std=c++0x
 LIBS = -pg
 
 goals: judge
