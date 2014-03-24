@@ -105,9 +105,9 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
 
   int filter_array[3][3];
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for (int i = 0; i < 3; i++){
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int j = 0; j < 3; j++){
       filter_array[i][j] = filter->get(i,j);
     }
@@ -115,13 +115,13 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // Hi-Line
   if (filter_array[0][1] == -2){
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
-      #pragma omp parallel for
+      // #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
@@ -150,16 +150,16 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // Gauss
   else if (filter_array[1][1] == 8){
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
 
-      #pragma omp parallel for
+      // #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
 
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
@@ -196,16 +196,16 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
 
   // Emboss
   else if (filter_array[1][2] == -1) {
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
 
-      #pragma omp parallel for
+      // #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
 
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
 
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
@@ -244,13 +244,13 @@ applyFilter(struct Filter *filter, cs1300bmp *input, cs1300bmp *output)
   }
   // Average
   else{
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(int p = 0; p < 3; p++) {
-      #pragma omp parallel for
+      // #pragma omp parallel for
       for(int r = 1; r < input_height; r++) {
         const int new_row1 = r - 1;
         const int new_row3 = r + 1;
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int c = 1; c < input_width; c++) {
 
           int acc1=0, acc2=0, acc3=0;
